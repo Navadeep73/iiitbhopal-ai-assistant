@@ -3,7 +3,7 @@
 Every semester, the same questions flood the college admin office and faculty inboxes — fee deadlines, hostel allotment, placement cutoffs. Students wait on email replies or dig through scattered PDFs for basic info.
 
 This is a RAG chatbot that fixes that: it's trained on IIIT Bhopal's own website and documents, and answers instantly — 24/7, no waiting.
-
+<!-- put your screenshot at docs/screenshot.png -->
 ![Screenshot](docs/screenshot.png(2))
 
 ---
