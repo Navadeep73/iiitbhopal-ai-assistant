@@ -4,7 +4,7 @@ Every semester, the same questions flood the college admin office and faculty in
 
 This is a RAG chatbot that fixes that: it's trained on IIIT Bhopal's own website and documents, and answers instantly — 24/7, no waiting.
 
-![Screenshot](docs/screenshot.png)
+![Screenshot](docs/screenshot.png (2))jpg
 
 ---
 
