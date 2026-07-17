@@ -8,15 +8,13 @@ from inges import load_all_documents
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from langchain_core.prompts import PromptTemplate
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from langchain_core.messages import HumanMessage, AIMessage
-
-from sentence_transformers import CrossEncoder
 
 
 
@@ -66,7 +64,12 @@ print(f"        {len(docs)} chunk(s) created.")
 
 print("\n[3/5]   Building vector store (this takes a minute first time)…")
 
-embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+# Gemini's hosted embedding API — no local model weights, no torch,
+# keeps the process light enough for free-tier hosting (Render 512MB etc.)
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=GOOGLE_API_KEY,
+)
 
 vectorstore = Chroma.from_documents(
     docs,
@@ -74,33 +77,13 @@ vectorstore = Chroma.from_documents(
     persist_directory="vector_db",
 )
 
-# k=20 — cast a wide net; reranker will filter down to the best 5
+# k=5 directly — no local cross-encoder reranker (that model alone was
+# ~90MB + torch runtime, the biggest chunk of the old memory footprint)
 retriever = vectorstore.as_retriever(
     search_type="similarity",
-    search_kwargs={"k": 20},
+    search_kwargs={"k": 5},
 )
 print("        Vector store ready.")
-
-
-
-
-print("\n[4/5] ⚡  Loading reranker…")
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-print("        Reranker ready.")
-
-
-def rerank(query: str, retrieved_docs: list) -> list:
-    
-    if not retrieved_docs:
-        return []
-
-    pairs  = [(query, doc.page_content) for doc in retrieved_docs]
-    scores = reranker.predict(pairs)
-
-    ranked = sorted(zip(retrieved_docs, scores), key=lambda x: x[1], reverse=True)
-
-    
-    return [doc for doc, _score in ranked[:5]]
 
 
 
@@ -170,8 +153,7 @@ llm = ChatGoogleGenerativeAI(
 def ask(query: str) -> str:
    
     retrieved_docs = retriever.invoke(query)
-    top_docs = rerank(query, retrieved_docs) if retrieved_docs else []
-    context = "\n\n---\n\n".join(doc.page_content for doc in top_docs) if top_docs else ""
+    context = "\n\n---\n\n".join(doc.page_content for doc in retrieved_docs) if retrieved_docs else ""
 
     
     formatted_prompt = PROMPT.format(
@@ -189,25 +171,26 @@ def ask(query: str) -> str:
 
 
 
-while True:
-    try:
-        query = input("  You  ❯  ").strip()
-    except (KeyboardInterrupt, EOFError):
-        print("\n\n   Goodbye!\n")
-        break
+if __name__ == "__main__":
+    while True:
+        try:
+            query = input("  You  ❯  ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n\n   Goodbye!\n")
+            break
 
-    if not query:
-        continue
+        if not query:
+            continue
 
-    if query.lower() in ("exit", "quit", "bye"):
-        print("\n   Goodbye!\n")
-        break
+        if query.lower() in ("exit", "quit", "bye"):
+            print("\n   Goodbye!\n")
+            break
 
-    try:
-        answer = ask(query)
-        print(f"\n   {answer}\n")
-        print("  " + "─"*51)
+        try:
+            answer = ask(query)
+            print(f"\n   {answer}\n")
+            print("  " + "─"*51)
 
-    except Exception as exc:                  
-        print(f"\n   Error: {exc}\n")
-        print("  " + "─"*51)
+        except Exception as exc:
+            print(f"\n   Error: {exc}\n")
+            print("  " + "─"*51)
