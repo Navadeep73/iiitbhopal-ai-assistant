@@ -30,7 +30,7 @@ Flask · LangChain · Gemini 2.5 Flash · Chroma DB · BeautifulSoup
 ## Running it locally
 
 ```bash
-git clone https://github.com/yourusername/your-repo.git
+git clone https://github.com/Navadeep73/iiitbhopal-ai-assistant.git
 cd your-repo
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -67,6 +67,3 @@ This isn't just a demo — it's built to actually be pitched to the college. The
 
 ---
 
-## License
-
-MIT
