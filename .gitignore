@@ -1,0 +1,17 @@
+# secrets
+.env
+*.env
+
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# data & vector store (regenerate via inges.py / rag_pipes.py)
+data/
+vector_db/
+
+# misc
+.DS_Store
+*.log

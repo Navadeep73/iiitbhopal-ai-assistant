@@ -1,0 +1,14 @@
+flask
+flask-cors
+langchain
+langchain-community
+langchain-google-genai
+langchain-text_splitters
+langchain-chromadb
+pypdf
+streamlit
+chromadb
+python-dotenv
+beautifulsoup4
+requests
+
