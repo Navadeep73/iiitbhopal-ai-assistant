@@ -13,3 +13,4 @@ chromadb
 python-dotenv
 beautifulsoup4
 requests
+
